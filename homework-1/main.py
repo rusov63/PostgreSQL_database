@@ -1,26 +1,49 @@
+import csv
+import os
 import psycopg2
-
-conn = psycopg2.connect(
-    host='localhost',
-    database='north',
-    user='postgres',
-    password='F9-00-4A-77-5E-3C')
+from psycopg2 import Error
 
 try:
-    with conn:
+    with psycopg2.connect(
+        host='localhost',
+        database='north',
+        user='postgres',
+        password=os.getenv('PassSQL')
+) as conn:
+        print('База данных North успешно открыта')
+        print("Информация о сервере PostgreSQL")
+        print(conn.get_dsn_parameters(), "\n")
+
         with conn.cursor() as cur:
-            #cur.executemany('insert into employees values (%s, %s)',[(1, 'Ivanov S.V'), (2, 'Petrova V.V')])
-            # cur.executemany('insert into customers values (%s, %s, %s, %s)', [(1, 'Sidorova S.P', '892588', 'smile.jpg'),
-            #                                                               (2, 'Petrova V.V', '58888', 'smile.jpg'),
-            #                                                               (3, 'Lerova C.C.', '84156', 'smile.jpg')])
-            # cur.executemany('insert into orders values (%s, %s, %s, %s)',[(1, 1, 'колбаса вареная', 2),
-            #                                                                  (2, 1, 'сыр Российский', 3),
-            #                                                               (3, 1, 'шоколад', 1)])
+            file = open('north_data/employees_data.csv', 'r', encoding='utf-8')
+            contents = csv.DictReader(file)
+            for id, row in enumerate(contents, 1):
+                cur.execute('insert into employees values (%s, %s, %s, %s, %s, %s)',
+                            (id, row['first_name'], row['last_name'], row['title'], row['birth_date'], row['notes']))
+        cur.close()
+        print("Значения успешно добавлены в таблицу Employees в PostgreSQL")
 
-            cur.execute('select * from customers')
+        with conn.cursor() as cur:
+            file = open('north_data/customers_data.csv', 'r', encoding='utf-8')
+            contents = csv.DictReader(file)
+            for row in contents:
+                cur.execute('insert into customers values (%s, %s, %s)',
+                                (row['customer_id'], row['company_name'], row['contact_name']))
+        cur.close()
+        print("Значения успешно добавлены в таблицу Customers в PostgreSQL")
 
-            rows=cur.fetchall()
-            for row in rows:
-                print(row)
+        with conn.cursor() as cur:
+            file = open('north_data/orders_data.csv', 'r', encoding='utf-8')
+            contents = csv.DictReader(file)
+            for row in contents:
+                cur.execute('insert into orders values (%s, %s, %s, %s, %s)',
+                                (row['order_id'], row['customer_id'], row['employee_id'], row['order_date'], row['ship_city']))
+        cur.close()
+        print("Значения успешно добавлены в таблицу Orders в PostgreSQL")
+
+except (Exception, Error) as error:
+    print("Ошибка при работе с PostgreSQL", error)
 finally:
-    conn.close()
+    if conn:
+            conn.close()
+            print("Соединение с PostgreSQL закрыто")
