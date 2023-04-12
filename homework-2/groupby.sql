@@ -36,10 +36,10 @@ order by count(*) desc
 - 6. страны, в которых зарегистрированы и заказчики (customers) и поставщики (suppliers) и работники (employees).
 select country as registered
 from customers
-union
+intersect
 select country
 from suppliers
-union
+intersect
 select country
 from employees
 
@@ -47,7 +47,7 @@ from employees
 -- работники (employees).
 select country as registered
 from customers
-except
+intersect
 select country
 from suppliers
 except
