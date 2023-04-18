@@ -16,7 +16,7 @@ select product_name, units_in_stock, category_name, discontinued, contact_name, 
 from products
 inner join categories using (category_id)
 inner join suppliers using (supplier_id)
-where discontinued <> 0 and units_in_stock < 25 and category_name in ('Dairy Products', 'Condiments')
+where discontinued != 1 and units_in_stock < 25 and category_name in ('Dairy Products', 'Condiments')
 order by units_in_stock
 
 
@@ -28,7 +28,7 @@ where not exists (Select company_name from orders
 
 -- 4. уникальные названия продуктов, которых заказано ровно 10 единиц (количество заказанных единиц см в колонке quantity табл order_details)
 -- Этот запрос написать именно с использованием подзапроса.
-select products.product_name, quantity
+select distinct products.product_name, quantity
 from products, order_details
 where exists (select products.product_name, quantity from products
 			 where order_details.product_id=products.product_id and
