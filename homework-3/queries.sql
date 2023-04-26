@@ -1,7 +1,7 @@
 -- Напишите запросы, которые выводят следующую информацию:
 -- 1. Название компании заказчика (company_name из табл. customers) и ФИО сотрудника, работающего над заказом этой компании (см таблицу employees),
 -- когда и заказчик и сотрудник зарегистрированы в городе London, а доставку заказа ведет компания United Package (company_name в табл shippers)
-select first_name as Имя, last_name as Фамилия, customers.city as Город, shippers.company_name as Грузоотправитель
+select concat(first_name, ' ', last_name) as ФИО, customers.company_name
 from orders
 inner join customers using (customer_id)
 inner join employees using (employee_id)
@@ -28,7 +28,7 @@ where not exists (Select company_name from orders
 
 -- 4. уникальные названия продуктов, которых заказано ровно 10 единиц (количество заказанных единиц см в колонке quantity табл order_details)
 -- Этот запрос написать именно с использованием подзапроса.
-select distinct products.product_name, quantity
+select distinct products.product_name
 from products, order_details
 where exists (select products.product_name, quantity from products
 			 where order_details.product_id=products.product_id and
